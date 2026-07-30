@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Rank & Analysis</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bokor&display=swap" rel="stylesheet">
+  
+  <!-- html2pdf Library CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --bg: #f8fafc;
+      --panel-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --gold: #d97706;
+      --silver: #475569;
+      --bronze: #b45309;
+    }
+
+    body {
+      font-family: 'Times New Roman', 'Bokor', serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .header-panel {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+      color: white;
+      padding: 24px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .header-panel h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .header-panel p {
+      margin: 6px 0 0;
+      opacity: 0.85;
+      font-size: 14px;
+    }
+
+    /* 📅 Controls & Actions Row */
+    .controls-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+
+    .filter-card {
+      background-color: var(--panel-bg);
+      border: 1px solid var(--border);
+      padding: 12px 20px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+      flex: 1;
+    }
+
+    .filter-card label {
+      font-weight: bold;
+      color: var(--primary);
+      font-size: 15px;
+      white-space: nowrap;
+    }
+
+    .filter-card select {
+      font-family: 'Times New Roman', 'Bokor', serif;
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 15px;
+      background-color: #f9fafb;
+      color: var(--text-main);
+      cursor: pointer;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .filter-card select:focus {
+      border-color: var(--primary);
+      background-color: white;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    /* PDF Download Button */
+    .btn-pdf {
+      font-family: 'Times New Roman', 'Bokor', serif;
+      background-color: #dc2626;
+      color: white;
+      border: none;
+      padding: 0 20px;
+      height: 48px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      white-space: nowrap;
+    }
+
+    .btn-pdf:hover {
+      background-color: #b91c1c;
+    }
+
+    .btn-pdf:active {
+      transform: scale(0.98);
+    }
+
+    /* Printable Area Wrapper */
+    #pdfExportContainer {
+      background-color: var(--panel-bg);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+
+    /* Stats Overview Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: #f8fafc;
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .stat-card .val {
+      font-size: 22px;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .stat-card .lbl {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Table Styling */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+    }
+
+    th, td {
+      padding: 10px 8px;
+      border: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    th {
+      background-color: #e2e8f0;
+      color: var(--text-main);
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    tr:hover {
+      background-color: #f8fafc;
+    }
+
+    /* Ranking Badges */
+    .badge {
+      display: inline-block;
+      width: 26px;
+      height: 26px;
+      line-height: 26px;
+      border-radius: 50%;
+      font-weight: bold;
+      color: white;
+      font-size: 13px;
+    }
+
+    .rank-1 { background-color: var(--gold); }
+    .rank-2 { background-color: var(--silver); }
+    .rank-3 { background-color: var(--bronze); }
+    .rank-other { background-color: #94a3b8; }
+
+    .total-score {
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    /* Loader & States */
+    #loadingState {
+      text-align: center;
+      padding: 40px;
+      font-size: 16px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header-panel">
+    <h2>🏆 សាលារៀន បឋមសិក្សាសុភាស</h2>
+    <p>តារាង ពិន្ទុស្ស (Student Score Analysis & Ranking)</p>
+  </div>
+
+  <!-- 📅 Month/Semester Picker & PDF Button Row -->
+  <div class="controls-row">
+    <div class="filter-card">
+      <label for="monthSelect">📅 ជ្រើសរើសខែ ឬឆមាស:</label>
+      <select id="monthSelect">
+        <option value="1" selected>ខែមករា (Month 1)</option>
+        <option value="2">ខែកុម្ភៈ (Month 2)</option>
+        <option value="3">ខែមីនា (Month 3)</option>
+        <option value="4">ខែមេសា (Month 4)</option>
+        <option value="5">ខែឧសភា (Month 5)</option>
+        <option value="6">ខែមិថុនា (Month 6)</option>
+        <option value="7">ខែកក្កដា (Month 7)</option>
+        <option value="8">ខែសីហា (Month 8)</option>
+        <option value="9">ខែកញ្ញា (Month 9)</option>
+        <option value="10">ខែតុលា (Month 10)</option>
+        <option value="11">ខែវិច្ឆិកា (Month 11)</option>
+        <option value="12">ខែធ្នូ (Month 12)</option>
+        <option value="S1">🎓 ឆមាសទី១ (Semester 1)</option>
+        <option value="S2">🎓 ឆមាសទី២ (Semester 2)</option>
+      </select>
+    </div>
+
+    <!-- 📄 Save to PDF Button -->
+    <button type="button" class="btn-pdf" onclick="exportAnalysisToPDF()">
+      📄 ទាញយកជា PDF
+    </button>
+  </div>
+
+  <!-- Printable Area Container -->
+  <div id="pdfExportContainer">
+    <!-- Stat Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="val" id="totalStudents">0</div>
+        <div class="lbl">ចំនួនសិស្សសរុប</div>
+      </div>
+      <div class="stat-card">
+        <div class="val" id="topScore">0</div>
+        <div class="lbl">ពិន្ទុខ្ពស់បំផុត (Top Total)</div>
+      </div>
+      <div class="stat-card">
+        <div class="val" id="avgScore">0</div>
+        <div class="lbl">មធ្យមភាគថ្នាក់សរុប</div>
+      </div>
+    </div>
+
+    <!-- Table Analysis -->
+    <div class="table-container">
+      <div id="loadingState">⏳ កំពុងទាញយកទិន្នន័យ...</div>
+      <table id="rankTable" style="display: none;">
+        <thead>
+          <tr>
+            <th>ល.រ</th>
+            <th>ឈ្មោះ</th>
+            <th>ខ្មែរ</th>
+            <th>គណិត</th>
+            <th>តែងសេចក្តី</th>
+            <th>សរសេរតាមអាន</th>
+            <th>អំណាន</th>
+            <th>អក្សរផ្ចង់</th>
+            <th>គំនូរ</th>
+            <th>ពិន្ទុសរុប</th>
+            <th>មធ្យមភាគ</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  const monthSelect = document.getElementById('monthSelect');
+  const loadingState = document.getElementById('loadingState');
+  const rankTable = document.getElementById('rankTable');
+
+  function fetchAndRenderAnalysis() {
+    const selectedMonth = monthSelect.value;
+    
+    let periodText = selectedMonth;
+    if (selectedMonth === 'S1') periodText = 'ឆមាសទី១';
+    else if (selectedMonth === 'S2') periodText = 'ឆមាសទី២';
+    else periodText = 'ខែ ' + selectedMonth;
+
+    loadingState.style.display = 'block';
+    loadingState.textContent = '⏳ កំពុងទាញយកទិន្នន័យ ' + periodText + '...';
+    rankTable.style.display = 'none';
+
+    google.script.run
+      .withSuccessHandler(renderAnalysisData)
+      .withFailureHandler(function(err) {
+        loadingState.style.display = 'block';
+        loadingState.textContent = '❌ មានបញ្ហាក្នុងការទាញយកទិន្នន័យ៖ ' + err;
+      })
+      .getAnalysisData(selectedMonth);
+  }
+
+  function renderAnalysisData(data) {
+    if (!data || data.length === 0) {
+      loadingState.style.display = 'block';
+      loadingState.textContent = '❌ ពុំមានទិន្នន័យពិន្ទុសម្រាប់រយៈពេលនេះទេ។';
+      resetStats();
+      return;
+    }
+
+    loadingState.style.display = 'none';
+
+    data.forEach(s => {
+      s.khmer = Number(s.khmer) || 0;
+      s.math = Number(s.math) || 0;
+      s.chaengSectrey = Number(s.chaengSectrey) || 0;
+      s.sorsevTamAn = Number(s.sorsevTamAn) || 0;
+      s.amnanh = Number(s.amnanh) || 0;
+      s.aksorPchong = Number(s.aksorPchong) || 0;
+      s.kounu = Number(s.kounu) || 0;
+
+      s.total = s.khmer + s.math + s.chaengSectrey + s.sorsevTamAn + s.amnanh + s.aksorPchong + s.kounu;
+      s.average = (s.total / 7).toFixed(2);
+    });
+
+    data.sort((a, b) => b.total - a.total);
+
+    const totalCount = data.length;
+    const highest = data[0].total;
+    const average = (data.reduce((sum, s) => sum + s.total, 0) / totalCount).toFixed(1);
+
+    document.getElementById('totalStudents').textContent = totalCount;
+    document.getElementById('topScore').textContent = highest;
+    document.getElementById('avgScore').textContent = average;
+
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+
+    let currentRank = 1;
+    data.forEach((student, index) => {
+      if (index > 0 && student.total < data[index - 1].total) {
+        currentRank = index + 1;
+      }
+
+      let badgeClass = 'rank-other';
+      if (currentRank === 1) badgeClass = 'rank-1';
+      else if (currentRank === 2) badgeClass = 'rank-2';
+      else if (currentRank === 3) badgeClass = 'rank-3';
+
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td><span class="badge ${badgeClass}">${currentRank}</span></td>
+        <td style="text-align: left; font-weight: 600;">${student.name}</td>
+        <td>${student.khmer}</td>
+        <td>${student.math}</td>
+        <td>${student.chaengSectrey}</td>
+        <td>${student.sorsevTamAn}</td>
+        <td>${student.amnanh}</td>
+        <td>${student.aksorPchong}</td>
+        <td>${student.kounu}</td>
+        <td class="total-score">${student.total}</td>
+        <td style="font-weight: 600; color: #059669;">${student.average}</td>
+      `;
+      tbody.appendChild(row);
+    });
+
+    rankTable.style.display = 'table';
+  }
+
+  function resetStats() {
+    document.getElementById('totalStudents').textContent = '0';
+    document.getElementById('topScore').textContent = '0';
+    document.getElementById('avgScore').textContent = '0';
+  }
+
+  function exportAnalysisToPDF() {
+    const selectedMonth = monthSelect.value;
+    
+    google.script.run
+      .withSuccessHandler(function(data) {
+        renderAnalysisData(data);
+        
+        setTimeout(() => {
+          const element = document.getElementById('pdfExportContainer');
+
+          if (!element) {
+            alert('រកមិនឃើញទិន្នន័យសម្រាប់ទាញយកជា PDF ទេ!');
+            return;
+          }
+
+          const selectedPeriod = monthSelect.options[monthSelect.selectedIndex].text.replace(/[\(\)]/g, '').trim();
+
+          const options = {
+            margin:       10,
+            filename:     'Student_Ranking_' + selectedPeriod + '.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+          };
+
+          html2pdf().from(element).set(options).save();
+        }, 300);
+      })
+      .withFailureHandler(function(err) {
+        alert('❌ មានបញ្ហាក្នុងการទាញយកទិន្នន័យចុងក្រោយ៖ ' + err);
+      })
+      .getAnalysisData(selectedMonth);
+  }
+
+  window.addEventListener('load', fetchAndRenderAnalysis);
+  monthSelect.addEventListener('change', fetchAndRenderAnalysis);
+</script>
+
+</body>
+</html>
