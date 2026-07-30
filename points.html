@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Points Entry Form</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bokor&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --bg: #f3f4f6;
+      --panel-bg: #ffffff;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+    }
+
+    body {
+      font-family: 'Times New Roman', 'Bokor', serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .dashboard-container {
+      background-color: var(--panel-bg);
+      width: 100%;
+      max-width: 580px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .form-header {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      padding: 20px 25px;
+      color: white;
+      text-align: center;
+    }
+
+    .form-header h2 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .form-header p {
+      margin: 5px 0 0;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    form {
+      padding: 25px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .full-width {
+      grid-column: span 2;
+    }
+
+    .search-box-container {
+      background-color: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 5px;
+    }
+
+    .input-group {
+      position: relative;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    input, select {
+      font-family: 'Times New Roman', 'Bokor', serif;
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background-color: #f9fafb;
+      font-size: 15px;
+      color: var(--text-main);
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #059669;
+      background-color: white;
+      box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1);
+    }
+
+    input:disabled, select:disabled {
+      background-color: #e5e7eb;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .button-group {
+      grid-column: span 2;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    button {
+      font-family: 'Times New Roman', 'Bokor', serif;
+      background-color: #059669;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    button:hover {
+      background-color: #047857;
+    }
+
+    button.btn-delete {
+      background-color: var(--danger);
+      margin-right: auto;
+    }
+
+    button.btn-delete:hover {
+      background-color: var(--danger-hover);
+    }
+
+    button:disabled {
+      background-color: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    #status {
+      grid-column: span 2;
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      display: none;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+  <div class="form-header">
+    <h2>ប្រព័ន្ធបញ្ចូលពិន្ទុសិស្សប្រចាំខែ និងឆមាស</h2>
+    <p>Student Points Management System</p>
+  </div>
+
+  <form id="pointsForm">
+    <div class="form-grid">
+
+      <!-- 📅 Dropdown ជ្រើសរើសខែ ឬឆមាស -->
+      <div class="input-group full-width">
+        <label for="monthSelect" style="color: #059669;">📅 ជ្រើសរើសខែ ឬឆមាស (Select Period) *</label>
+        <select id="monthSelect" required>
+          <option value="" disabled selected> សូមជ្រើសរើសខែ ឬឆមាសជាមុនសិន </option>
+          <option value="1">ខែមករា (Month 1)</option>
+          <option value="2">ខែកុម្ភៈ (Month 2)</option>
+          <option value="3">ខែមីនា (Month 3)</option>
+          <option value="4">ខែមេសា (Month 4)</option>
+          <option value="5">ខែឧសភា (Month 5)</option>
+          <option value="6">ខែមិថុនា (Month 6)</option>
+          <option value="7">ខែកក្កដា (Month 7)</option>
+          <option value="8">ខែសីហា (Month 8)</option>
+          <option value="9">ខែកញ្ញា (Month 9)</option>
+          <option value="10">ខែតុលា (Month 10)</option>
+          <option value="11">ខែវិច្ឆិកា (Month 11)</option>
+          <option value="12">ខែធ្នូ (Month 12)</option>
+          <option value="S1">🎓 ឆមាសទី១ (Semester 1)</option>
+          <option value="S2">🎓 ឆមាសទី២ (Semester 2)</option>
+        </select>
+      </div>
+
+      <!-- 🔍 ជ្រើសរើសសិស្សដែលមានស្រាប់ -->
+      <div class="input-group full-width search-box-container">
+        <label for="searchStudent" style="color: #065f46;">🔍 ជ្រើសរើសសិស្សដែលមានស្រាប់ (ដើម្បីកែប្រែ ឬលុបពិន្ទុ)</label>
+        <select id="searchStudent" disabled>
+          <option value=""> បញ្ចូលពិន្ទុសិស្សថ្មី </option>
+        </select>
+      </div>
+
+      <!-- ជ្រើសរើសឈ្មោះសិស្ស -->
+      <div class="input-group full-width">
+        <label for="studentName">ឈ្មោះសិស្ស (Student Name)</label>
+        <select id="studentName" required disabled>
+          <option value="" disabled selected> ជ្រើសរើសឈ្មោះសិស្ស </option>
+        </select>
+      </div>
+
+      <!-- ខ្មែរ -->
+      <div class="input-group">
+        <label for="khmer">ខ្មែរ</label>
+        <select id="khmer" required disabled>
+          <option value="" disabled selected>ជ្រើសរើស</option>
+          <script>
+            for(let i=0; i<=10; i++) document.write(`<option value="${i}">${i}</option>`);
+          </script>
+        </select>
+      </div>
+
+      <!-- គណិត -->
+      <div class="input-group">
+        <label for="math">គណិត</label>
+        <select id="math" required disabled>
+          <option value="" disabled selected>ជ្រើសរើស</option>
+          <script>
+            for(let i=0; i<=10; i++) document.write(`<option value="${i}">${i}</option>`);
+          </script>
+        </select>
+      </div>
+
+      <!-- ចែងសេចក្តី -->
+      <div class="input-group">
+        <label for="chaengSectrey">តែងសេចក្តី</label>
+        <select id="chaengSectrey" required disabled>
+          <option value="" disabled selected>ជ្រើសរើស</option>
+          <script>
+            for(let i=0; i<=10; i++) document.write(`<option value="${i}">${i}</option>`);
+          </script>
+        </select>
+      </div>
+
+      <!-- សរសេរតាមអាន -->
+      <div class="input-group">
+        <label for="sorsevTamAn">សរសេរតាមអាន</label>
+        <select id="sorsevTamAn" required disabled>
+          <option value="" disabled selected>ជ្រើសរើស</option>
+          <script>
+            for(let i=0; i<=10; i++) document.write(`<option value="${i}">${i}</option>`);
+          </script>
+        </select>
+      </div>
+
+      <!-- អំណាន -->
+      <div class="input-group">
+        <label for="amnanh">អំណាន</label>
+        <select id="amnanh" required disabled>
+          <option value="" disabled selected>ជ្រើសរើស</option>
+          <script>
+            for(let i=0; i<=10; i++) document.write(`<option value="${i}">${i}</option>`);
+          </script>
+        </select>
+      </div>
+
+      <!-- អក្សរផ្ចង់ -->
+      <div class="input-group">
+        <label for="aksorPchong">អក្សរផ្ចង់</label>
+        <select id="aksorPchong" required disabled>
+          <option value="" disabled selected>ជ្រើសរើស</option>
+          <script>
+            for(let i=0; i<=10; i++) document.write(`<option value="${i}">${i}</option>`);
+          </script>
+        </select>
+      </div>
+
+      <!-- គំនូរ -->
+      <div class="input-group full-width">
+        <label for="kounu">គំនូរ</label>
+        <select id="kounu" required disabled>
+          <option value="" disabled selected>ជ្រើសរើស</option>
+          <script>
+            for(let i=0; i<=10; i++) document.write(`<option value="${i}">${i}</option>`);
+          </script>
+        </select>
+      </div>
+
+      <!-- ប៊ូតុង Submit & Delete -->
+      <div class="button-group">
+        <button type="button" id="deleteBtn" class="btn-delete" style="display: none;" disabled>
+          🗑️ លុបទិន្នន័យ
+        </button>
+        <button type="submit" id="submitBtn" disabled>
+          <div class="spinner" id="btnSpinner"></div>
+          <span id="btnText">រក្សាទុកពិន្ទុ (Save Record)</span>
+        </button>
+      </div>
+
+      <div id="status"></div>
+    </div>
+  </form>
+</div>
+
+<script>
+  const searchSelect = document.getElementById('searchStudent');
+  const studentNameSelect = document.getElementById('studentName');
+  const monthSelect = document.getElementById('monthSelect');
+  const deleteBtn = document.getElementById('deleteBtn');
+  const submitBtn = document.getElementById('submitBtn');
+  const btnText = document.getElementById('btnText');
+  
+  const scoreInputs = [
+    document.getElementById('khmer'),
+    document.getElementById('math'),
+    document.getElementById('chaengSectrey'),
+    document.getElementById('sorsevTamAn'),
+    document.getElementById('amnanh'),
+    document.getElementById('aksorPchong'),
+    document.getElementById('kounu')
+  ];
+
+  function getPeriodLabel(val) {
+    if (val === 'S1') return 'ឆមាសទី១';
+    if (val === 'S2') return 'ឆមាសទី២';
+    return 'ខែ ' + val;
+  }
+
+  function loadStudentDropdowns() {
+    google.script.run.withSuccessHandler(function(list) {
+      searchSelect.innerHTML = '<option value=""> បញ្ចូលពិន្ទុសិស្សថ្មី </option>';
+      studentNameSelect.innerHTML = '<option value="" disabled selected> ជ្រើសរើសឈ្មោះសិស្ស </option>';
+
+      if (list && list.length > 0) {
+        list.forEach(function(name) {
+          const opt1 = document.createElement('option');
+          opt1.value = name;
+          opt1.textContent = name;
+          searchSelect.appendChild(opt1);
+
+          const opt2 = document.createElement('option');
+          opt2.value = name;
+          opt2.textContent = name;
+          studentNameSelect.appendChild(opt2);
+        });
+      }
+    }).getStudentNames();
+  }
+
+  window.addEventListener('load', loadStudentDropdowns);
+
+  function handleMonthChange() {
+    const isMonthSelected = monthSelect.value !== "";
+    searchSelect.disabled = !isMonthSelected;
+    
+    if (!isMonthSelected) {
+      resetFormState();
+      return;
+    }
+
+    enableFormInputs(true);
+    
+    if (searchSelect.value) {
+      checkStudentMonthData();
+    } else {
+      updateButtonText();
+    }
+  }
+
+  function enableFormInputs(enable) {
+    studentNameSelect.disabled = !enable || (searchSelect.value !== "");
+    scoreInputs.forEach(input => input.disabled = !enable);
+    submitBtn.disabled = !enable;
+  }
+
+  function updateButtonText() {
+    const periodStr = getPeriodLabel(monthSelect.value);
+    if (searchSelect.value) {
+      btnText.textContent = 'កែប្រែពិន្ទុ ' + periodStr + ' (Update Record)';
+    } else {
+      btnText.textContent = 'រក្សាទុកពិន្ទុ ' + periodStr + ' (Save Record)';
+    }
+  }
+
+  function checkStudentMonthData() {
+    const selectedName = searchSelect.value;
+    const selectedMonth = monthSelect.value;
+
+    if (!selectedMonth) return;
+
+    if (!selectedName) {
+      resetFormToAddNew();
+      return;
+    }
+
+    google.script.run.withSuccessHandler(function(res) {
+      if (res && res.found) {
+        studentNameSelect.value = selectedName;
+        studentNameSelect.disabled = true;
+        
+        document.getElementById('khmer').value = res.khmer !== undefined ? String(res.khmer) : '';
+        document.getElementById('math').value = res.math !== undefined ? String(res.math) : '';
+        document.getElementById('chaengSectrey').value = res.chaengSectrey !== undefined ? String(res.chaengSectrey) : '';
+        document.getElementById('sorsevTamAn').value = res.sorsevTamAn !== undefined ? String(res.sorsevTamAn) : '';
+        document.getElementById('amnanh').value = res.amnanh !== undefined ? String(res.amnanh) : '';
+        document.getElementById('aksorPchong').value = res.aksorPchong !== undefined ? String(res.aksorPchong) : '';
+        document.getElementById('kounu').value = res.kounu !== undefined ? String(res.kounu) : '';
+
+        updateButtonText();
+        deleteBtn.style.display = 'inline-flex';
+        deleteBtn.disabled = false;
+      } else {
+        studentNameSelect.value = selectedName;
+        studentNameSelect.disabled = true;
+        clearScores();
+        updateButtonText();
+        deleteBtn.style.display = 'none';
+        deleteBtn.disabled = true;
+      }
+    }).getStudentPointsByNameAndMonth(selectedName, selectedMonth);
+  }
+
+  monthSelect.addEventListener('change', handleMonthChange);
+  searchSelect.addEventListener('change', checkStudentMonthData);
+
+  function clearScores() {
+    scoreInputs.forEach(input => input.value = '');
+  }
+
+  function resetFormToAddNew() {
+    studentNameSelect.value = '';
+    studentNameSelect.disabled = false;
+    clearScores();
+    updateButtonText();
+    deleteBtn.style.display = 'none';
+    deleteBtn.disabled = true;
+  }
+
+  function resetFormState() {
+    document.getElementById('pointsForm').reset();
+    searchSelect.disabled = true;
+    studentNameSelect.disabled = true;
+    scoreInputs.forEach(input => input.disabled = true);
+    submitBtn.disabled = true;
+    deleteBtn.style.display = 'none';
+    deleteBtn.disabled = true;
+    btnText.textContent = 'រក្សាទុកពិន្ទុ (Save Record)';
+  }
+
+  deleteBtn.addEventListener('click', function() {
+    const selectedName = searchSelect.value;
+    const selectedMonth = monthSelect.value;
+
+    if (!selectedName || !selectedMonth) {
+      alert('សូមជ្រើសរើសខែ/ឆមាស និងឈ្មោះសិស្សជាមុនសិន!');
+      return;
+    }
+
+    const periodStr = getPeriodLabel(selectedMonth);
+    if (confirm('តើអ្នកពិតជាចង់លុបទិន្នន័យពិន្ទុ ' + periodStr + ' របស់សិស្ស "' + selectedName + '" នេះមែនទេ?')) {
+      const statusDiv = document.getElementById('status');
+      submitBtn.disabled = true;
+      deleteBtn.disabled = true;
+
+      google.script.run.withSuccessHandler(function(res) {
+        submitBtn.disabled = false;
+        deleteBtn.disabled = false;
+        statusDiv.style.display = 'block';
+
+        if (res && res.result === 'success') {
+          statusDiv.style.backgroundColor = '#d1fae5';
+          statusDiv.style.color = '#065f46';
+          statusDiv.textContent = '✅ ' + res.message;
+          resetFormToAddNew();
+        } else {
+          statusDiv.style.backgroundColor = '#fee2e2';
+          statusDiv.style.color = '#991b1b';
+          statusDiv.textContent = '❌ មានបញ្ហា៖ ' + (res ? res.error : 'Unknown error');
+        }
+      }).deleteStudentPoints(selectedName, selectedMonth);
+    }
+  });
+
+  document.getElementById('pointsForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if (!monthSelect.value) {
+      alert('សូមជ្រើសរើសខែ ឬឆមាសជាមុនសិន!');
+      return;
+    }
+
+    const statusDiv = document.getElementById('status');
+    const spinner = document.getElementById('btnSpinner');
+    
+    submitBtn.disabled = true;
+    spinner.style.display = 'block';
+    statusDiv.style.display = 'none';
+
+    const pointsData = {
+      month: monthSelect.value,
+      studentName: studentNameSelect.value,
+      khmer: document.getElementById('khmer').value,
+      math: document.getElementById('math').value,
+      chaengSectrey: document.getElementById('chaengSectrey').value,
+      sorsevTamAn: document.getElementById('sorsevTamAn').value,
+      amnanh: document.getElementById('amnanh').value,
+      aksorPchong: document.getElementById('aksorPchong').value,
+      kounu: document.getElementById('kounu').value
+    };
+
+    google.script.run
+      .withSuccessHandler(function(response) {
+        spinner.style.display = 'none';
+        submitBtn.disabled = false;
+        statusDiv.style.display = 'block';
+
+        if (response && response.result === "success") {
+          statusDiv.style.backgroundColor = '#d1fae5';
+          statusDiv.style.color = '#065f46';
+          statusDiv.textContent = '✅ ' + response.message;
+          resetFormToAddNew();
+        } else {
+          statusDiv.style.backgroundColor = '#fee2e2';
+          statusDiv.style.color = '#991b1b';
+          statusDiv.textContent = '❌ មានបញ្ហា៖ ' + (response ? response.error : 'Unknown error');
+        }
+      })
+      .withFailureHandler(function(err) {
+        spinner.style.display = 'none';
+        submitBtn.disabled = false;
+        statusDiv.style.display = 'block';
+        statusDiv.style.backgroundColor = '#fee2e2';
+        statusDiv.style.color = '#991b1b';
+        statusDiv.textContent = '❌ មិនអាចភ្ជាប់ទៅកាន់ Server បានទេ!';
+      })
+      .processPointsForm(pointsData);
+  });
+</script>
+
+</body>
+</html>
