@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Registration Dashboard</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bokor&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --bg: #f3f4f6;
+      --panel-bg: #ffffff;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+    }
+
+    body {
+      font-family: 'Times New Roman', 'Bokor', serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .dashboard-container {
+      background-color: var(--panel-bg);
+      width: 100%;
+      max-width: 650px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .form-header {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      padding: 20px 25px;
+      color: white;
+      text-align: center;
+    }
+
+    .form-header h2 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .form-header p {
+      margin: 5px 0 0;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    form {
+      padding: 25px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .full-width {
+      grid-column: span 2;
+    }
+
+    .search-box-container {
+      background-color: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 5px;
+    }
+
+    .input-group {
+      position: relative;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 12px;
+      top: 36px;
+      width: 18px;
+      height: 18px;
+      color: #a1a1aa;
+      pointer-events: none;
+    }
+
+    input, select {
+      font-family: 'Times New Roman', 'Bokor', serif;
+      width: 100%;
+      padding: 10px 10px 10px 38px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background-color: #f9fafb;
+      font-size: 15px;
+      color: var(--text-main);
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+    }
+
+    .no-icon {
+      padding-left: 12px !important;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      background-color: white;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    /* Floating buttons setup */
+    .button-group {
+      grid-column: span 2;
+      display: flex;
+      justify-content: flex-end; /* Pushes content to the right */
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    button {
+      font-family: 'Times New Roman', 'Bokor', serif;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    button:hover {
+      background-color: var(--primary-hover);
+    }
+
+    button.btn-delete {
+      background-color: var(--danger);
+      margin-right: auto; /* Pushes Delete button to the far left when active */
+    }
+
+    button.btn-delete:hover {
+      background-color: var(--danger-hover);
+    }
+
+    button:disabled {
+      background-color: #93c5fd;
+      cursor: not-allowed;
+    }
+
+    #status {
+      grid-column: span 2;
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      display: none;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+  <div class="form-header">
+    <h2>ប្រព័ន្ធគ្រប់គ្រងព័ត៌មានសិស្ស</h2>
+    <p>Student Management System</p>
+  </div>
+
+  <form id="studentForm">
+    <!-- Hidden input to track original name for updates -->
+    <input type="hidden" id="originalName" name="originalName">
+
+    <div class="form-grid">
+      
+      <!-- ផ្នែកជ្រើសរើសឈ្មោះសិស្សដើម្បី Update/Delete -->
+      <div class="input-group full-width search-box-container">
+        <label for="searchStudent" style="color: #1e40af;">🔍 ជ្រើសរើសសិស្សដែលមានស្រាប់ (ដើម្បីកែប្រែ ឬលុប)</label>
+        <select id="searchStudent" class="no-icon">
+          <option value=""> បញ្ចូលសិស្សថ្មី </option>
+        </select>
+      </div>
+
+      <!-- នាមខ្លួន (First Name) -->
+      <div class="input-group">
+        <label for="firstName">នាមខ្លួន (First Name)</label>
+        <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
+        <input type="text" id="firstName" placeholder="នាមខ្លួន" required>
+      </div>
+
+      <!-- គោត្តនាម (Last Name) -->
+      <div class="input-group">
+        <label for="lastName">គោត្តនាម (Last Name)</label>
+        <input type="text" id="lastName" class="no-icon" placeholder="គោត្តនាម" required>
+      </div>
+
+      <!-- លេខទូរស័ព្ទ (Phone Number) -->
+      <div class="input-group full-width">
+        <label for="phone">លេខទូរស័ព្ទ (Phone Number)</label>
+        <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-1.514 2.018a1.379 1.379 0 0 1-1.347.567 19.977 19.977 0 0 1-8.279-8.279 1.38 1.38 0 0 1 .567-1.347l2.018-1.514c.362-.272.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
+        </svg>
+        <input type="text" id="phone" placeholder="012345678" inputmode="numeric" pattern="[0-9]*" maxlength="10" required>
+      </div>
+
+      <!-- Dropdown ជ្រើសរើសឃុំ/សង្កាត់ -->
+      <div class="input-group">
+        <label for="sangkat">ឃុំ / សង្កាត់ (Commune/Sangkat)</label>
+        <select id="sangkat" class="no-icon" required>
+          <option value="" disabled selected> ជ្រើសរើសឃុំ </option>
+          <option value="ឃុំមេសរជ្រៃ">ឃុំមេសរជ្រៃ</option>
+          <option value="ឃុំអារក្សត្នោត">ឃុំអារក្សត្នោត</option>
+          <option value="ឃុំដងក្ដារ">ឃុំដងក្ដារ</option>
+          <option value="ឃុំខ្ពបតាងួន">ឃុំខ្ពបតាងួន</option>
+          <option value="ឃុំអូរម្លូ">ឃុំអូរម្លូ</option>
+          <option value="ឃុំពាមកោះស្នា">ឃុំពាមកោះស្នា</option>
+          <option value="ឃុំព្រះអណ្តូង">ឃុំព្រះអណ្តូង</option>
+          <option value="ឃុំព្រែកបាក់">ឃុំព្រែកបាក់</option>
+          <option value="ឃុំព្រែកកក់">ឃុំព្រែកកក់</option>
+          <option value="ឃុំសូភាស">ឃុំសូភាស</option>
+          <option value="ឃុំទួលព្រះឃ្លាំង">ឃុំទួលព្រះឃ្លាំង</option>
+          <option value="ឃុំទួលសំបួរ">ឃុំទួលសំបួរ</option>
+        </select>
+      </div>
+
+      <!-- Dropdown ជ្រើសរើសភូមិ -->
+      <div class="input-group">
+        <label for="village">ភូមិ (Village)</label>
+        <select id="village" class="no-icon" required disabled>
+          <option value="" disabled selected> សូមជ្រើសរើសឃុំជាមុនសិន </option>
+        </select>
+      </div>
+
+      <!-- Auto-fill ស្រុកស្ទឹងត្រង់ -->
+      <div class="input-group">
+        <label for="district">ស្រុក / ខណ្ឌ (District/Khan)</label>
+        <input type="text" id="district" class="no-icon" value="ស្រុកស្ទឹងត្រង់" required readonly>
+      </div>
+
+      <!-- Auto-fill ខេត្តកំពង់ចាម -->
+      <div class="input-group">
+        <label for="province">រាជធានី / ខេត្ត (Province)</label>
+        <input type="text" id="province" class="no-icon" value="ខេត្តកំពង់ចាម" required readonly>
+      </div>
+
+      <!-- ស្ថានភាព Checklist -->
+      <div class="input-group full-width">
+        <label for="checklist">ស្ថានភាពពិនិត្យ (Checklist Status)</label>
+        <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+        <select id="checklist">
+          <option value="រង់ចាំ" selected>រង់ចាំ</option>
+          <option value="បានអនុម័ត">បានអនុម័ត</option>
+          <option value="បានបញ្ចប់">បានបញ្ចប់</option>
+        </select>
+      </div>
+
+      <!-- ប៊ូតុង Submit & Delete -->
+      <div class="button-group">
+        <button type="button" id="deleteBtn" class="btn-delete" style="display: none;">
+          🗑️ លុបទិន្នន័យ
+        </button>
+        <button type="submit" id="submitBtn">
+          <div class="spinner" id="btnSpinner"></div>
+          <span id="btnText">រក្សាទុកទិន្នន័យ (Save Record)</span>
+        </button>
+      </div>
+
+      <div id="status"></div>
+    </div>
+  </form>
+</div>
+
+<script>
+  const villageData = {
+    "ឃុំអារក្សត្នោត": ["ភូមិ អារក្សត្នោត", "ភូមិ ល្វា", "ភូមិ គីឡូប្រាំពីរ", "ភូមិ គីឡូដប់", "ភូមិ បែកអន្លង់"],
+    "ឃុំដងក្ដារ": ["ភូមិ សន្តិជខាងកើត", "ភូមិ សន្តិជខាងលិច", "ភូមិ សន្តិជកណ្តាល", "ភូមិ ជ្រៃហាយ", "ភូមិ ស្រែរំដួល", "ភូមិ តារាម", "ភូមិ ស្ដៅ", "ភូមិ អូរពីរ", "ភូមិ ថ្មី", "ភូមិ ហុងព្រមារ"],
+    "ឃុំខ្ពបតាងួន": ["ភូមិ អូររុន", "ភូមិ អន្លង់សំឡី", "ភូមិ ព្រែកតូក", "ភូមិ ខ្ពបតាងួន", "ភូមិ ឈើទើ", "ភូមិ វាលបំពង់"],
+    "ឃុំមេសរជ្រៃ": ["ភូមិ អូរលើ", "ភូមិ ក្បាលអូរ", "ភូមិ បុសពោធិ៍", "ភូមិ អូរបេង", "ភូមិ ត្រពាំងឈូក"],
+    "ឃុំអូរម្លូ": ["ភូមិ ខ្ទួយមួយ", "ភូមិ ខ្ទួយពីរ", "ភូមិ ខ្ទួយបី", "ភូមិ ខ្ទួយបួន", "ភូមិ ស្ទឹងសាខា", "ភូមិ អូរប្រឡោះ", "ភូមិ អូរកាប់មាន់", "ភូមិ អូរឫស្សី", "ភូមិ អូរតាសេក", "ភូមិ សំរោង", "ភូមិ ប្រតុង", "ភូមិ បិទធ្នូ", "ភូមិ ស្ពង់សាខាចាស់"],
+    "ឃុំពាមកោះស្នា": ["ភូមិ ពាមក្រៅ", "ភូមិ ពាមក្នុង", "ភូមិ ដីលើ", "ភូមិ ទួលរកា", "ភូមិ ដីដុះ", "ភូមិ ព្រែកសង្កែខាងកើត", "ភូមិ ព្រែកសង្កែខាងលិច", "ភូមិ កោះកណ្តាល", "ភូមិ ស្រែសង្កែ"],
+    "ឃុំព្រះអណ្តូង": ["ភូមិ ព្រែកស្ដី", "ភូមិ ព្រះអណ្តូងមួយ", "ភូមិ ព្រះអណ្តូងពីរ"],
+    "ឃុំព្រែកបាក់": ["ភូមិ ព្រែកបាក់", "ភូមិ ព្រែកកាក់", "ភូមិ ព្រែករលួស", "ភូមិ ព្រែកព្រះអង្គ"],
+    "ឃុំព្រែកកក់": ["ភូមិ អណ្តូងពេជ្រ", "ភូមិ មេខមួយ", "ភូមិ មេខពីរ", "ភូមិ ត្នោតតាសាយ", "ភូមិ បឹងកាចូត", "ភូមិ អូរប្រាំពីរ", "ភូមិ ទួលពោធិ៍", "ភូមិ ព្រះ", "ភ្នំ ភ្នំមន្ត្រី", "ភូមិ ព្រែកបារាំង", "ភូមិ បឹងដែង", "ភ្នំ ភ្នំអំពិល", "ភូមិ បឹងកេតលើ", "ភូមិ បឹងកេតក្រោម", "ភូមិ ហាសិបប្រាំមួយ", "ភូមិ ចេកជ្វា", "ភូមិ អូរចេក", "ភូមិ គីឡូបី", "ភូមិ សាមសិបប្រាំ", "ភូមិ ចិតសិប", "ភូមិ អូរប្រាំ", "ភូមិ មេខបី", "ភូមិ អណ្តូងស្វាយ"],
+    "ឃុំសូភាស": ["ភូមិ សូភាស", "ភូមិ អង្គោល", "ភូមិ ស្រប", "ភូមិ ប៉ប្រក", "ភូមិ សំបូរ", "ភូមិ ដីក្រហម", "ភ្នំ ភ្នំទប់"],
+    "ឃុំទួលព្រះឃ្លាំង": ["ភូមិ ធំ", "ភូមិ ថ្មី", "ភូមិ តាម៉ឹង", "ភូមិ វត្ត", "ភូមិ ដូនតរ", "ភូមិ សំពាំងក្រោម", "ភូមិ សំពាំងលើ"],
+    "ឃុំទួលសំបួរ": ["ភូមិ ទួលសំបួរ", "ភូមិ ពូន", "ភូមិ ស្រែអំពៅ", "ភូមិ វាលព្រះ"]
+  };
+
+  const sangkatSelect = document.getElementById('sangkat');
+  const villageSelect = document.getElementById('village');
+  const searchSelect = document.getElementById('searchStudent');
+  const deleteBtn = document.getElementById('deleteBtn');
+  const btnText = document.getElementById('btnText');
+  const phoneInput = document.getElementById('phone');
+  const originalNameInput = document.getElementById('originalName');
+
+  // Strict Phone Validation: Allow 0-9 only
+  phoneInput.addEventListener('input', function() {
+    this.value = this.value.replace(/[^0-9]/g, '');
+  });
+
+  // ទាញយកបញ្ជីឈ្មោះមកដាក់ក្នុង Dropdown Search
+  function loadStudentDropdown() {
+    google.script.run.withSuccessHandler(function(list) {
+      searchSelect.innerHTML = '<option value=""> បញ្ចូលសិស្សថ្មី </option>';
+      if (list && list.length > 0) {
+        list.forEach(function(name) {
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = name;
+          searchSelect.appendChild(opt);
+        });
+      }
+    }).getAllStudentList();
+  }
+
+  // ដំណើរការនៅពេលបើក Form ដំបូង
+  window.addEventListener('load', loadStudentDropdown);
+
+  function populateVillages(sangkatValue, targetVillageValue) {
+    const villages = villageData[sangkatValue];
+    villageSelect.innerHTML = '<option value="" disabled selected> ជ្រើសរើសភូមិ </option>';
+    if (villages && villages.length > 0) {
+      villageSelect.disabled = false;
+      villages.forEach(function(v) {
+        const option = document.createElement('option');
+        option.value = v;
+        option.textContent = v;
+        villageSelect.appendChild(option);
+      });
+      if (targetVillageValue) villageSelect.value = targetVillageValue;
+    } else {
+      villageSelect.disabled = true;
+    }
+  }
+
+  sangkatSelect.addEventListener('change', function() {
+    populateVillages(this.value, null);
+  });
+
+  // នៅពេលជ្រើសរើសឈ្មោះសិស្សចេញពី Dropdown Search
+  searchSelect.addEventListener('change', function() {
+    const selectedName = this.value;
+    if (!selectedName) {
+      resetFormState();
+      return;
+    }
+
+    // Set the original name for reference on update
+    originalNameInput.value = selectedName;
+
+    google.script.run.withSuccessHandler(function(res) {
+      if (res && res.found) {
+        document.getElementById('firstName').value = res.firstName || '';
+        document.getElementById('lastName').value = res.lastName || '';
+        document.getElementById('phone').value = res.phone || '';
+        document.getElementById('sangkat').value = res.sangkat || '';
+        
+        populateVillages(res.sangkat, res.village);
+
+        document.getElementById('district').value = res.district || 'ស្រុកស្ទឹងត្រង់';
+        document.getElementById('province').value = res.province || 'ខេត្តកំពង់ចាម';
+        document.getElementById('checklist').value = res.checklist || 'រង់ចាំ';
+
+        btnText.textContent = 'កែប្រែទិន្នន័យ (Update Record)';
+        deleteBtn.style.display = 'inline-flex';
+      }
+    }).getStudentByName(selectedName);
+  });
+
+  function resetFormState() {
+    document.getElementById('studentForm').reset();
+    originalNameInput.value = '';
+    document.getElementById('district').value = 'ស្រុកស្ទឹងត្រង់';
+    document.getElementById('province').value = 'ខេត្តកំពង់ចាម';
+    villageSelect.innerHTML = '<option value="" disabled selected> សូមជ្រើសរើសឃុំជាមុនសិន </option>';
+    villageSelect.disabled = true;
+    btnText.textContent = 'រក្សាទុកទិន្នន័យ (Save Record)';
+    deleteBtn.style.display = 'none';
+    searchSelect.value = '';
+  }
+
+  // ដំណើរការលុបទិន្នន័យ
+  deleteBtn.addEventListener('click', function() {
+    const selectedName = searchSelect.value;
+    if (!selectedName) return;
+
+    if (confirm('តើអ្នកពិតជាចង់លុបទិន្នន័យសិស្ស "' + selectedName + '" នេះមែនទេ?')) {
+      const submitBtn = document.getElementById('submitBtn');
+      const statusDiv = document.getElementById('status');
+      
+      submitBtn.disabled = true;
+      deleteBtn.disabled = true;
+
+      google.script.run.withSuccessHandler(function(res) {
+        submitBtn.disabled = false;
+        deleteBtn.disabled = false;
+        statusDiv.style.display = 'block';
+
+        if (res && res.result === 'success') {
+          statusDiv.style.backgroundColor = '#d1fae5';
+          statusDiv.style.color = '#065f46';
+          statusDiv.textContent = '✅ ' + res.message;
+          resetFormState();
+          loadStudentDropdown();
+        } else {
+          statusDiv.style.backgroundColor = '#fee2e2';
+          statusDiv.style.color = '#991b1b';
+          statusDiv.textContent = '❌ មានបញ្ហា៖ ' + (res ? res.error : 'Unknown error');
+        }
+      }).deleteStudentData(selectedName);
+    }
+  });
+
+  // Submit Form (Save / Update)
+  document.getElementById('studentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('submitBtn');
+    const statusDiv = document.getElementById('status');
+    const spinner = document.getElementById('btnSpinner');
+    
+    submitBtn.disabled = true;
+    spinner.style.display = 'block';
+    statusDiv.style.display = 'none';
+
+    const formData = {
+      originalName: originalNameInput.value,
+      firstName: document.getElementById('firstName').value,
+      lastName: document.getElementById('lastName').value,
+      phone: document.getElementById('phone').value,
+      village: document.getElementById('village').value,
+      sangkat: document.getElementById('sangkat').value,
+      district: document.getElementById('district').value,
+      province: document.getElementById('province').value,
+      checklist: document.getElementById('checklist').value
+    };
+
+    google.script.run
+      .withSuccessHandler(function(response) {
+        spinner.style.display = 'none';
+        submitBtn.disabled = false;
+        statusDiv.style.display = 'block';
+
+        if (response && response.result === "success") {
+          statusDiv.style.backgroundColor = '#d1fae5';
+          statusDiv.style.color = '#065f46';
+          statusDiv.textContent = '✅ ' + response.message;
+          
+          resetFormState();
+          loadStudentDropdown();
+        } else {
+          statusDiv.style.backgroundColor = '#fee2e2';
+          statusDiv.style.color = '#991b1b';
+          statusDiv.textContent = '❌ មានបញ្ហា៖ ' + (response ? response.error : 'Unknown error');
+        }
+      })
+      .withFailureHandler(function(err) {
+        spinner.style.display = 'none';
+        submitBtn.disabled = false;
+        statusDiv.style.display = 'block';
+        
+        statusDiv.style.backgroundColor = '#fee2e2';
+        statusDiv.style.color = '#991b1b';
+        statusDiv.textContent = '❌ មិនអាចភ្ជាប់ទៅកាន់ Server បានទេ!';
+      })
+      .processForm(formData);
+  });
+</script>
+
+</body>
+</html>
